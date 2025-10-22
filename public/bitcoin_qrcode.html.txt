@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Bitcoin Payment QR (BIP21) — Generator</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial;margin:24px;background:#f7fafc;color:#0f172a}
+    .card{background:white;border-radius:12px;box-shadow:0 6px 20px rgba(2,6,23,0.08);padding:20px;max-width:720px;margin:0 auto}
+    label{display:block;margin-top:12px;font-size:14px}
+    input[type=text], input[type=number]{width:100%;padding:10px;border-radius:8px;border:1px solid #e6e9ef;margin-top:6px}
+    .row{display:flex;gap:12px}
+    .col{flex:1}
+    button{margin-top:14px;padding:10px 14px;border-radius:10px;border:0;background:#0b5fff;color:white;cursor:pointer}
+    button.secondary{background:#e6eefc;color:#0b3bff}
+    #qrcodeWrap{display:flex;gap:20px;align-items:center;margin-top:16px}
+    canvas{background:#fff;padding:8px;border-radius:8px}
+    small{color:#475569}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>Bitcoin QR code (BIP21) — Generator</h2>
+    <p>Enter a Bitcoin address and optional amount/label/message. This produces a BIP21 URI (bitcoin:...) which is compatible with most wallets (Blockchain, Binance, Trust Wallet, etc.).</p>
+
+    <label>Bitcoin address</label>
+    <input id="addr" type="text" placeholder="e.g. bc1q..." value="" />
+
+    <div class="row">
+      <div class="col">
+        <label>Amount (BTC) — optional</label>
+        <input id="amount" type="number" step="0.00000001" placeholder="0.01" />
+      </div>
+      <div class="col">
+        <label>Label — optional (shown in some wallets)</label>
+        <input id="label" type="text" placeholder="e.g. Invoice #1234" />
+      </div>
+    </div>
+
+    <label>Message — optional</label>
+    <input id="message" type="text" placeholder="Payment for services" />
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button id="gen">Generate QR</button>
+      <button id="copyUri" class="secondary">Copy URI</button>
+      <button id="download" class="secondary">Download PNG</button>
+    </div>
+
+    <div id="qrcodeWrap">
+      <canvas id="canvas" width="260" height="260"></canvas>
+      <div>
+        <div><strong>URI</strong></div>
+        <div id="uriText" style="max-width:320px;word-break:break-all;color:#0b2447;margin-top:6px"></div>
+        <small>Scan with most Bitcoin wallets (Blockchain.com, Binance, Trust Wallet, BlueWallet, etc.)</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- qrcode library (browser build) -->
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    // Helper to build BIP21 URI: bitcoin:<address>?amount=0.01&label=Label&message=Message
+    function buildBIP21(address, opts){
+      if(!address) return '';
+      const params = [];
+      if(opts.amount && String(opts.amount).trim() !== '') params.push('amount=' + encodeURIComponent(opts.amount));
+      if(opts.label) params.push('label=' + encodeURIComponent(opts.label));
+      if(opts.message) params.push('message=' + encodeURIComponent(opts.message));
+      return params.length ? `bitcoin:${address}?${params.join('&')}` : `bitcoin:${address}`;
+    }
+
+    const addrEl = document.getElementById('addr');
+    const amountEl = document.getElementById('amount');
+    const labelEl = document.getElementById('label');
+    const messageEl = document.getElementById('message');
+    const genBtn = document.getElementById('gen');
+    const copyBtn = document.getElementById('copyUri');
+    const downloadBtn = document.getElementById('download');
+    const canvas = document.getElementById('canvas');
+    const uriText = document.getElementById('uriText');
+
+    function generate(){
+      const addr = addrEl.value.trim();
+      const opts = { amount: amountEl.value.trim(), label: labelEl.value.trim(), message: messageEl.value.trim() };
+      const uri = buildBIP21(addr, opts);
+      uriText.textContent = uri || '(empty address)';
+
+      // clear canvas first
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      if(!uri) return;
+
+      // Use the QRCode library to draw to canvas. Use a margin and scale.
+      QRCode.toCanvas(canvas, uri, { errorCorrectionLevel: 'M', margin: 2, width: 260 }, function (error) {
+        if (error) console.error(error);
+      });
+    }
+
+    genBtn.addEventListener('click', (e)=>{ e.preventDefault(); generate(); });
+
+    copyBtn.addEventListener('click', async ()=>{
+      const uri = uriText.textContent;
+      if(!uri) return alert('No URI to copy. Generate first.');
+      try{
+        await navigator.clipboard.writeText(uri);
+        copyBtn.textContent = 'Copied!';
+        setTimeout(()=> copyBtn.textContent = 'Copy URI', 1200);
+      }catch(err){
+        alert('Unable to copy to clipboard: ' + err);
+      }
+    });
+
+    downloadBtn.addEventListener('click', ()=>{
+      const uri = uriText.textContent;
+      if(!uri) return alert('Generate a QR first.');
+      const link = document.createElement('a');
+      link.download = (addrEl.value || 'bitcoin') + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    });
+
+    // Optional: generate example on load if you want
+    // addrEl.value = 'bc1q...';
+    // generate();
+  </script>
+</body>
+</html>

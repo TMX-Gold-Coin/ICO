@@ -1,0 +1,568 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Checkout — Pay with Bitcoin</title>
+<link rel="preconnect" href="https://assets/fonts.googleapis.com">
+<link href="https://assets/fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f1724;
+    --card:#0b1220;
+    --muted:#9aa4b2;
+    --accent:#f59e0b; /* amber */
+    --accent-2:#06b6d4; /* teal */
+    --success:#10b981;
+    --glass: rgba(255,255,255,0.03);
+    --glass-2: rgba(255,255,255,0.02);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    background: linear-gradient(180deg,#071026 0%, #071428 60%), radial-gradient(600px 400px at 10% 10%, rgba(6,182,212,0.06), transparent 10%);
+    color:#e6eef6;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+  }
+
+  .container{
+    width:100%;
+    max-width:980px;
+    display:grid;
+    grid-template-columns: 420px 1fr;
+    gap:28px;
+    align-items:start;
+  }
+
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent);
+    border-radius:14px;
+    padding:22px;
+    box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+
+  .left{
+    padding:26px;
+    background: linear-gradient(180deg,var(--glass),transparent);
+  }
+  .brand {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin-bottom:18px;
+  }
+  .logo {
+    width:46px;height:46px;border-radius:10px;
+    display:grid;place-items:center;
+    background: linear-gradient(135deg,var(--accent),var(--accent-2));
+    box-shadow: 0 6px 20px rgba(6,182,212,0.08), inset 0 -6px 15px rgba(0,0,0,0.15);
+    font-weight:800;color:#062024;font-size:18px;
+  }
+  h1{font-size:20px;margin:0}
+  p.lead{color:var(--muted);margin:6px 0 18px;font-size:13px}
+
+  .qr-wrap{display:flex;flex-direction:column;align-items:center;gap:14px}
+  .qr {
+    background:linear-gradient(180deg,#071428 0%, #041827 120%);
+    padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.03);
+    display:inline-block;
+  }
+  .info {
+    width:100%;
+    margin-top:8px;
+    display:flex;
+    gap:8px;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .info .addr {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace;
+    font-size:13px;color:#cfe8f5;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    max-width:260px;
+  }
+  .btn {
+    display:inline-flex;align-items:center;gap:8px;
+    background:var(--accent);color:#041023;padding:10px 14px;border-radius:10px;
+    font-weight:600;border: none; cursor:pointer; transition:transform .12s ease, box-shadow .12s;
+    box-shadow: 0 8px 24px rgba(245,158,11,0.14);
+  }
+  .btn:active{transform:translateY(1px)}
+  .btn:disabled{opacity:.6;cursor:default}
+
+  .small {
+    font-size:13px;color:var(--muted)
+  }
+
+  .right{
+    padding:20px 26px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    justify-content:flex-start;
+  }
+
+  .panel{
+    padding:18px;border-radius:12px;background:linear-gradient(180deg,var(--glass-2),transparent);
+    border:1px solid rgba(255,255,255,0.02);
+  }
+
+  .order-summary{display:flex;justify-content:space-between;align-items:center}
+  .price {font-size:26px;font-weight:700}
+  .meta{color:var(--muted);font-size:13px}
+
+  .copy {
+    background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:10px;color:var(--muted);
+    cursor:pointer;font-weight:600;
+  }
+
+  .status {
+    display:flex;gap:12px;align-items:center;
+    padding:14px;border-radius:12px;
+  }
+  .status.pending{background:linear-gradient(90deg, rgba(255,255,255,0.02), transparent)}
+  .status.paid{background:linear-gradient(90deg, rgba(16,185,129,0.08), transparent)}
+  .status .dot{width:12px;height:12px;border-radius:50%}
+  .dot.pending{background:linear-gradient(180deg,#f59e0b,#06b6d4)}
+  .dot.paid{background:var(--success)}
+
+  .tiny {font-size:12px;color:var(--muted)}
+
+  .progress {
+    height:10px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden;
+  }
+  .progress > i {display:block;height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .6s ease}
+
+  .explorer {
+    color:var(--muted);font-size:13px;text-decoration:none;border-bottom:1px dashed rgba(255,255,255,0.03);
+  }
+
+  /* success animation */
+  .success-wrap {display:none;flex-direction:column;align-items:center;gap:12px}
+  .success-wrap.show {display:flex}
+  .check {
+    width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#052025,#06313b);
+    display:grid;place-items:center;border: 6px solid rgba(16,185,129,0.12);
+    box-shadow: 0 10px 40px rgba(16,185,129,0.06);
+  }
+  .check svg {width:46px;height:46px;stroke:var(--success);stroke-width:5;fill:none}
+
+  footer.small{color:var(--muted);text-align:center;margin-top:12px;font-size:13px}
+
+  /* responsive */
+  @media (max-width:900px){
+    .container{grid-template-columns:1fr;max-width:720px}
+    .left,.right{padding:18px}
+    .info .addr{max-width:160px}
+  }
+</style>
+</head>
+<body>
+  <main class="container" role="main">
+    <!-- LEFT: QR + Info -->
+    <section class="card left">
+      <div class="brand">
+        <div class="logo">₿</div>
+        <div>
+          <h1>Pay with Bitcoin</h1>
+          <p class="lead">Secure crypto payments — automated confirmations. No account required.</p>
+        </div>
+      </div>
+
+      <div id="mainArea" class="qr-wrap">
+        <!-- initial CTA -->
+        <div id="ctaPanel" class="panel" style="width:100%;text-align:center;">
+          <p style="margin:0 0 12px;font-weight:700">Complete your payment</p>
+          <p class="small" style="margin:0 0 18px">Click below to create a unique payment address & QR for this order.</p>
+          <div style="display:flex;gap:12px;justify-content:center;">
+            <button id="startBtn" class="btn" title="Create order and show QR">Create Payment</button>
+            <button id="demoBtn" class="btn" style="background:#0b1220;color:var(--accent);box-shadow:none;border:1px solid rgba(255,255,255,0.03)">Demo</button>
+          </div>
+        </div>
+
+        <!-- payment card -->
+        <div id="paymentCard" class="panel" style="display:none;width:100%;align-items:center">
+          <div class="qr" id="qrHolder" aria-hidden="true">
+            <!-- QR image inserted here -->
+            <img id="qrImg" src="" alt="Bitcoin QR" width="240" height="240" style="display:block;border-radius:10px;">
+          </div>
+
+          <div class="info" style="margin-top:12px;">
+            <div>
+              <div style="display:flex;gap:8px;align-items:center;">
+                <div class="addr" id="addressText">—</div>
+              </div>
+              <div class="meta tiny" id="explainer">Send the exact BTC amount shown below.</div>
+            </div>
+
+            <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+              <button id="copyBtn" class="copy" title="Copy address">Copy</button>
+              <a id="explorerLink" class="explorer" target="_blank" rel="noopener">View on explorer</a>
+            </div>
+          </div>
+
+          <div style="width:100%;margin-top:14px;display:flex;justify-content:space-between;align-items:center;">
+            <div>
+              <div class="tiny">Amount to pay</div>
+              <div class="price" id="amountBtc">0.00000000 BTC</div>
+              <div class="meta tiny" id="amountFiat">≈ $0.00</div>
+            </div>
+
+            <div style="text-align:right">
+              <div class="tiny">Order</div>
+              <div style="font-weight:700" id="orderId">—</div>
+              <div class="meta tiny" id="orderStatus">pending</div>
+            </div>
+          </div>
+
+          <div style="width:100%;margin-top:16px;">
+            <div class="status pending" id="statusBox">
+              <div class="dot pending" id="statusDot"></div>
+              <div>
+                <div id="statusText"><strong>Waiting for payment</strong></div>
+                <div class="tiny" id="statusSub">We'll detect the payment automatically.</div>
+              </div>
+            </div>
+
+            <div style="margin-top:12px;">
+              <div class="tiny">Payment progress</div>
+              <div class="progress" style="margin-top:8px">
+                <i id="progressBar" style="width:0%"></i>
+              </div>
+              <div class="tiny" style="margin-top:8px" id="receivedText">Received: 0 BTC</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- success -->
+        <div id="successCard" class="panel success-wrap" aria-live="polite">
+          <div class="check" role="img" aria-hidden="true">
+            <svg viewBox="0 0 52 52"><path d="M14 27 L22 34 L38 16" /></svg>
+          </div>
+          <div style="text-align:center">
+            <h2 style="margin:0 0 6px">Payment received</h2>
+            <p class="tiny" style="margin:0 0 6px">Thanks! Your order is confirmed and will be processed.</p>
+            <div id="paidAmount" style="font-weight:700;color:var(--success)"></div>
+          </div>
+        </div>
+
+      </div>
+
+      <footer class="small" style="margin-top:18px">Tip: Use the exact BTC amount to avoid over/under payments. Wait for 1–3 confirmations depending on your risk policy.</footer>
+    </section>
+
+    <!-- RIGHT: Order summary + controls -->
+    <aside class="card right">
+      <div class="panel">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <div class="tiny">Order total</div>
+            <div class="price" id="summaryFiat"></div>
+            <div class="meta tiny">Checkout with Bitcoin</div>
+          </div>
+          <div style="text-align:right">
+            <div class="tiny">Target</div>
+            <div style="font-weight:700" id="summaryBtc">— BTC</div>
+          </div>
+        </div>
+
+        <hr style="border:none;border-top:1px solid rgba(255,255,255,0.03);margin:12px 0">
+
+        <div style="display:flex;gap:10px;align-items:center;justify-content:space-between">
+          <div>
+            <div class="tiny">Order creation</div>
+            <div style="font-weight:700" id="createdAt">—</div>
+            <div class="tiny" id="expiryText">Expires in: —</div>
+          </div>
+          <div>
+            <button id="refreshBtn" class="btn" style="background:#09202a;color:var(--accent);box-shadow:none">Refresh</button>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="panel" style="margin-top:14px;">
+        <div style="display:flex;align-items:center;gap:12px;">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" style="opacity:.95"><path d="M12 1v22" stroke="currentColor" stroke-width="1.6"/></svg>
+          <div>
+            <div style="font-weight:700">Need help?</div>
+            <div class="tiny">Contact support with your order ID if payment doesn't show up after confirmations.</div>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+  </main>
+
+<script>
+/*
+  REQUIREMENTS:
+   - POST /create-order  { amountUSD }  -> returns { orderId, address, amountBTC, qr }
+   - GET  /check-payment/:orderId       -> returns { status, receivedBTC }
+   This page handles UI + polling for payment.
+
+   For demo/testing without a backend, click "Demo".
+*/
+
+const startBtn = document.getElementById('startBtn');
+const demoBtn = document.getElementById('demoBtn');
+const paymentCard = document.getElementById('paymentCard');
+const successCard = document.getElementById('successCard');
+const qrImg = document.getElementById('qrImg');
+const addressText = document.getElementById('addressText');
+const copyBtn = document.getElementById('copyBtn');
+const explorerLink = document.getElementById('explorerLink');
+const amountBtc = document.getElementById('amountBtc');
+const amountFiat = document.getElementById('amountFiat');
+const orderIdEl = document.getElementById('orderId');
+const orderStatusEl = document.getElementById('orderStatus');
+const statusBox = document.getElementById('statusBox');
+const statusText = document.getElementById('statusText');
+const statusSub = document.getElementById('statusSub');
+const statusDot = document.getElementById('statusDot');
+const progressBar = document.getElementById('progressBar');
+const receivedText = document.getElementById('receivedText');
+const createdAt = document.getElementById('createdAt');
+const expiryText = document.getElementById('expiryText');
+const summaryBtc = document.getElementById('summaryBtc');
+const summaryFiat = document.getElementById('summaryFiat');
+const refreshBtn = document.getElementById('refreshBtn');
+const paidAmount = document.getElementById('paidAmount');
+
+let pollInterval = null;
+let order = null;
+let expiryTimer = null;
+
+// Customize default fiat amount for this checkout:
+let defaultFiat = 20.00;
+summaryFiat.textContent = `$${defaultFiat.toFixed(2)}`;
+
+startBtn.addEventListener('click', createOrder);
+demoBtn.addEventListener('click', demoCreateOrder);
+copyBtn.addEventListener('click', copyAddress);
+refreshBtn.addEventListener('click', () => {
+  if(order) checkPayment();
+});
+ let  API = "https://www.goldcoin.com/api/btc";
+
+async function createOrder() {
+  startBtn.disabled = true;
+  startBtn.textContent = 'Creating...';
+
+  try {
+    const res = await fetch(`${API}/create-order/${}`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ amountUSD: defaultFiat })
+    });
+
+    if (!res.ok) throw new Error('Failed to create order');
+
+    const data = await res.json();
+    useOrderData(data);
+  } catch (err) {
+    console.error(err);
+    alert('Unable to create order. Check console for details.');
+    startBtn.disabled = false;
+    startBtn.textContent = 'Create Payment';
+  }
+}
+
+// Demo flow without backend (simulate create-order + checking)
+function demoCreateOrder() {
+  // fake address + qr + amount
+  const fake = {
+    orderId: 'demo-' + Math.random().toString(36).slice(2,9),
+    address: '13hm8o5cG63H7fM5CuioY5iwnukHZPX6VD',
+    amountBTC: (0.00075).toFixed(8),
+    qr: `https://chart.googleapis.com/chart?chs=260x260&cht=qr&chl=bitcoin:bc1qdemoaddressxk7q8yq9pz0qkz?amount=${(0.00075).toFixed(8)}`
+  };
+  useOrderData(fake, true);
+}
+
+function useOrderData(data, demo=false) {
+  order = {
+    id: data.orderId,
+    address: data.address,
+    amountBTC: parseFloat(data.amountBTC),
+    qr: data.qr,
+    createdAt: new Date().toISOString()
+  };
+
+  // populate UI
+  paymentCard.style.display = 'block';
+  document.getElementById('ctaPanel').style.display = 'none';
+  qrImg.src = order.qr;
+  addressText.textContent = order.address;
+  amountBtc.textContent = `${order.amountBTC.toFixed(8)} BTC`;
+  summaryBtc.textContent = `${order.amountBTC.toFixed(8)} BTC`;
+  amountFiat.textContent = `≈ $${defaultFiat.toFixed(2)}`;
+  orderIdEl.textContent = order.id;
+  orderStatusEl.textContent = 'pending';
+  statusText.innerHTML = '<strong>Waiting for payment</strong>';
+  statusSub.textContent = "We'll detect the payment automatically.";
+  statusBox.classList.remove('paid');
+  statusBox.classList.add('pending');
+  statusDot.classList.remove('paid');
+  statusDot.classList.add('pending');
+  progressBar.style.width = '0%';
+  receivedText.textContent = 'Received: 0 BTC';
+  createdAt.textContent = new Date(order.createdAt).toLocaleString();
+  expiryText.textContent = 'Expires in: 30m';
+
+  // show explorer link (blockstream)
+  explorerLink.href = `https://blockstream.info/address/${order.address}`;
+
+  // start polling
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(() => {
+    if (demo) {
+      // simulate progress: increase progress until paid
+      simulateDemoProgress();
+    } else {
+      checkPayment();
+    }
+  }, 8000);
+
+  // also do immediate check
+  if (demo) simulateDemoProgress(); else checkPayment();
+
+  startExpiryCountdown(30*60); // 30 minutes
+  startBtn.disabled = false;
+  startBtn.textContent = 'Create Payment';
+}
+
+let demoProgress = 0;
+function simulateDemoProgress() {
+  // increment demo progress
+  demoProgress += Math.random() * 28 + 10;
+  if (demoProgress >= 100) {
+    demoProgress = 100;
+    // mark as paid
+    onPaid(order.amountBTC);
+    clearInterval(pollInterval);
+  } else {
+    progressBar.style.width = demoProgress + '%';
+    receivedText.textContent = `Received: ${(order.amountBTC * (demoProgress/100)).toFixed(8)} BTC`;
+  }
+}
+
+async function checkPayment() {
+  if (!order || !order.id) return;
+
+  try {
+   
+    const res = await fetch(`${API}/check-payment/${encodeURIComponent(order.id)}`);
+    if (!res.ok) {
+      console.warn('check-payment returned', res.status);
+      return;
+    }
+    const data = await res.json();
+    const received = parseFloat(data.receivedBTC || 0);
+    const required = parseFloat(order.amountBTC || 0);
+
+    // update progress bar (cap to 100)
+    const pct = Math.min(100, (received / required) * 100);
+    progressBar.style.width = `${(isFinite(pct) ? pct : 0)}%`;
+    receivedText.textContent = `Received: ${received.toFixed(8)} BTC`;
+
+    if (data.status === 'paid' || received >= required) {
+      onPaid(received);
+      clearInterval(pollInterval);
+    } else {
+      // still waiting
+      statusText.innerHTML = '<strong>Waiting for payment</strong>';
+      statusSub.textContent = 'We are monitoring the blockchain for the incoming transaction.';
+    }
+  } catch (err) {
+    console.error('Error checking payment:', err);
+  }
+}
+
+function onPaid(received) {
+  orderStatusEl.textContent = 'paid';
+  statusText.innerHTML = '<strong>Payment confirmed</strong>';
+  statusSub.textContent = 'Thank you — funds received.';
+  statusBox.classList.remove('pending');
+  statusBox.classList.add('paid');
+  statusDot.classList.remove('pending');
+  statusDot.classList.add('paid');
+  progressBar.style.width = '100%';
+  receivedText.textContent = `Received: ${parseFloat(received).toFixed(8)} BTC`;
+  paidAmount.textContent = `${parseFloat(received).toFixed(8)} BTC`;
+
+  // show success card
+  successCard.classList.add('show');
+
+  // optionally: stop expiry timer
+  if (expiryTimer) { clearInterval(expiryTimer); expiryTimer = null; }
+}
+
+async function copyAddress(){
+  if (!order || !order.address) return;
+  try {
+    await navigator.clipboard.writeText(order.address);
+    copyBtn.textContent = 'Copied';
+    setTimeout(()=> copyBtn.textContent = 'Copy', 1800);
+  } catch (err) {
+    alert('Copy failed. Please select and copy manually.');
+  }
+}
+
+function startExpiryCountdown(seconds) {
+  let remaining = seconds;
+  if (expiryTimer) clearInterval(expiryTimer);
+
+  expiryTimer = setInterval(() => {
+    remaining--;
+    if (remaining <= 0) {
+      expiryText.textContent = 'Expired';
+      clearInterval(expiryTimer);
+      // If desired: mark order expired on server / disable payment
+    } else {
+      const m = Math.floor(remaining/60);
+      const s = remaining % 60;
+      expiryText.textContent = `Expires in: ${m}m ${s}s`;
+    }
+  }, 1000);
+}
+
+// For graceful cleanup when leaving page
+window.addEventListener('beforeunload', () => {
+  if (pollInterval) clearInterval(pollInterval);
+  if (expiryTimer) clearInterval(expiryTimer);
+});
+
+   function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+
+    const usd = getQueryParam("usd");
+    const btc = getQueryParam("btc");
+
+    const btcAddress = "13hm8o5cG63H7fM5CuioY5iwnukHZPX6VD";; // your merchant address
+    const qrUrl = `https://chart.googleapis.com/chart?chs=200x200&cht=qr&chl=bitcoin:${btcAddress}?amount=${btc}`;
+
+   /** document.getElementById("paymentDetails").innerHTML = `
+      <p><b>USD Amount:</b> $${usd}</p>
+      <p><b>BTC Amount:</b> ${btc} BTC</p>
+      <p>Send BTC to:</p>
+      <code>${btcAddress}</code><br><br>
+      <img src="${qrUrl}" alt="BTC QR Code">
+    `; **/
+    document.getElementById("amountBtc").innerHTML = btc;
+    document.getElementById("amountFiat").innerHTML= `$${usd.toFixed(2)}`;
+    document.getElementById("summaryFiat").innerHTML=`$${usd.toFixed(2)}`;
+    defaultFiat = usd.toFixed(2);
+    
+</script>
+</body>
+</html>

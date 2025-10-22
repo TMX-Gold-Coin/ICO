@@ -1,0 +1,91 @@
+import WebSocket from "ws";
+
+import axios from "axios";
+import express from "express";
+
+const ADDRESS = "yourBTCaddressHere";
+const MIN_AMOUNT = 0.01; // BTC threshold
+
+// Blockstream mempool API (ws)
+// Use `wss://mempool.space/api/v1/ws` for mainnet
+const ws = new WebSocket("wss://blockstream.info/api/v1/ws");
+
+ws.on("open", () => {
+  console.log("🔍 Connected to Bitcoin mempool WebSocket");
+  // subscribe to address transactions
+  ws.send(JSON.stringify({ "track-address": ADDRESS }));
+});
+
+ws.on("message", (msg) => {
+  try {
+    const data = JSON.parse(msg.toString());
+    if (data.address === ADDRESS && data.tx) {
+      let totalReceived = 0;
+      for (const vout of data.tx.vout) {
+        if (vout.scriptpubkey_address === ADDRESS) {
+          totalReceived += vout.value; // value in sats
+        }
+      }
+      const btc = totalReceived / 1e8;
+      if (btc >= MIN_AMOUNT) {
+        console.log(`💰 BTC deposit received: ${btc} BTC in tx ${data.tx.txid}`);
+      }
+    }
+  } catch (err) {
+    console.error("Error parsing:", err);
+  }
+});
+
+
+
+
+
+
+const API_BASE = "https://api.blockcypher.com/v1/btc/main";
+const CALLBACK_URL = "https://your-server.com/btc-callback"; // must be public & HTTPS
+const ADDRESS = "yourBTCaddressHere";
+const MIN_AMOUNT = 0.01; // in BTC
+
+const app = express();
+app.use(express.json());
+
+// 1️⃣ Setup webhook on BlockCypher
+async function registerWebhook() {
+  try {
+    const res = await axios.post(`${API_BASE}/hooks`, {
+      event: "tx-confirmation",
+      address: ADDRESS,
+      confirmations: 1, // wait for 1 confirmation
+      url: CALLBACK_URL
+    });
+    console.log("✅ Webhook registered:", res.data);
+  } catch (err) {
+    console.error("❌ Error registering webhook:", err.response?.data || err.message);
+  }
+}
+
+// 2️⃣ Endpoint to receive callbacks
+app.post("/btc-callback", (req, res) => {
+  const tx = req.body;
+  console.log("🔔 New BTC transaction received:", tx.hash);
+
+  let totalReceived = 0;
+  tx.outputs.forEach((out) => {
+    if (out.addresses && out.addresses.includes(ADDRESS)) {
+      totalReceived += out.value; // in satoshis
+    }
+  });
+
+  const btc = totalReceived / 1e8;
+  if (btc >= MIN_AMOUNT) {
+    console.log(`💰 Deposit confirmed: ${btc} BTC`);
+  }
+
+  res.sendStatus(200);
+});
+
+// Start server
+app.listen(3000, () => {
+  console.log("🚀 Listening on port 3000");
+  registerWebhook();
+});
