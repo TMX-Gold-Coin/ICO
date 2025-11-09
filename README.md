@@ -1,4 +1,4 @@
-# 🪙 TMX Gold Coin (TMXG) ICO
+# 🪙 TMX Gold Coin (TMXGT) ICO
 
 **Official ICO repository for TMX Gold Coin — powering the TMX Blockchain Logistics Ecosystem.**
 TMX Gold Coin ($TMXGT) is the utility and governance token for the TMX Global Logistics DApp — designed to revolutionize trade, transport, and freight management through blockchain innovation.
