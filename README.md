@@ -1,12 +1,12 @@
 # 🪙 TMX Gold Coin (TMXG) ICO
 
 **Official ICO repository for TMX Gold Coin — powering the TMX Blockchain Logistics Ecosystem.**
-TMX Gold Coin ($TMXG) is the utility and governance token for the TMX Global Logistics DApp — designed to revolutionize trade, transport, and freight management through blockchain innovation.
+TMX Gold Coin ($TMXGT) is the utility and governance token for the TMX Global Logistics DApp — designed to revolutionize trade, transport, and freight management through blockchain innovation.
 
 ---
 
 ## 🚀 Overview
-TMX Gold Coin (TMXG) serves as the fuel for the **TMX Blockchain Logistics Platform**, enabling:
+TMX Gold Coin (TMXGT) serves as the fuel for the **TMX Blockchain Logistics Platform**, enabling:
 - Borderless payments across the TMX Freight Forwarders Network
 - Transparent supply chain settlement using blockchain
 - Staking, rewards, and DeFi-based logistics finance
@@ -17,7 +17,7 @@ TMX Gold Coin (TMXG) serves as the fuel for the **TMX Blockchain Logistics Platf
 ## 🧠 Key Features
 - **ERC-20 Compliant Token** – Built on Ethereum for full transparency and interoperability.
 - **Logistics-Driven Use Case** – Backed by real global trade and supply chain operations.
-- **Reward & Staking System** – Earn passive income by staking TMXG tokens.
+- **Reward & Staking System** – Earn passive income by staking TMXGT tokens.
 - **Decentralized Freight Payments** – Peer-to-peer logistics payments powered by blockchain.
 - **Token Utility Expansion** – Integration into TMX DApp, TMX Freight Network, and TMXDuka.
 
@@ -37,10 +37,10 @@ TMX Gold Coin (TMXG) serves as the fuel for the **TMX Blockchain Logistics Platf
 
 ## 🧩 Smart Contract Details
 - **Token Standard:** ERC-20
-- **Blockchain:** Ethereum
+- **Blockchain:** Avalanche
 - **Contract Address:** *(to be announced after audit)*
-- **Symbol:** TMXG
-- **Total Supply:** 1,000,000,000 TMXG
+- **Symbol:** TMXGT
+- **Total Supply:** 1,000,000,000 TMXGT
 
 ---
 
@@ -62,7 +62,8 @@ TMX Gold Coin is **backed by the global logistics market**, providing investors 
 ---
 
 ## 🧭 Links
-- 🌐 **Website:** [tmxgoldcoin.co](https://tmxgoldcoin.co)
+- 🌐 **Website:** [goldcoin.tmxglobal.com](https://goldcoin.tmxglobal.com)
+- 🌐 **ICO Site:** [tmxgoldcoin.co](https://tmxgoldcoin.co)
 - 🌐 **Parent Company:** [tmxglobal.com](https://tmxglobal.com)
 - 📜 **Whitepaper:** [View Whitepaper](https://www.canva.com/design/DAGuDzdf-Cc/HkhJ6bT1Tt4iCizhZ7grJw/view)
 - 🪙 **GitHub Repo:** [TMX-Gold-Coin/ICO](https://github.com/TMX-Gold-Coin/ICO)
@@ -71,7 +72,7 @@ TMX Gold Coin is **backed by the global logistics market**, providing investors 
 
 ## 👥 Team
 **Founder & CEO:** Antony Njenga  
-**Lead Developer:** Kelvin Ndereba  
+**Lead Developer:** Kelvin Ngendo  
 **Advisors:** TMX Global Blockchain Development Team
 
 ---
