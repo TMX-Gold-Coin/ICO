@@ -65,7 +65,7 @@ TMX Gold Coin is **backed by the global logistics market**, providing investors 
 - 🌐 **Website:** [goldcoin.tmxglobal.com](https://goldcoin.tmxglobal.com)
 - 🌐 **ICO Site:** [tmxgoldcoin.co](https://tmxgoldcoin.co)
 - 🌐 **Parent Company:** [tmxglobal.com](https://tmxglobal.com)
-- 📜 **Pitch Deck:** [View Whitepaper](https://tmxgold.my.canva.site/presentation-tmx-gold-coin-investor-pitch)
+- 📜 **Pitch Deck:** [View Deck](https://tmxgold.my.canva.site/presentation-tmx-gold-coin-investor-pitch)
 - 📜 **Whitepaper:** [View Whitepaper](https://www.canva.com/design/DAGuDzdf-Cc/HkhJ6bT1Tt4iCizhZ7grJw/view)
 - 🪙 **GitHub Repo:** [TMX-Gold-Coin/ICO](https://github.com/TMX-Gold-Coin/ICO)
 
